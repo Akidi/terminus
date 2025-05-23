@@ -13,6 +13,7 @@ type Entity interface {
 	Name() string
 	Level() int
 	ArchType() ArchType
+	Attributes() stats.Attributes
 	ToJSON() ([]byte, error)
 }
 
@@ -38,6 +39,10 @@ func (e *EntityImpl) Level() int {
 
 func (e *EntityImpl) ArchType() ArchType {
 	return e.archType
+}
+
+func (e *EntityImpl) Attributes() stats.Attributes {
+	return e.attributes
 }
 
 type EntityJson struct {

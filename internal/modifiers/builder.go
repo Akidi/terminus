@@ -1,4 +1,4 @@
-// import path: terminus/internal/modifiers
+// import path: terminus/internal/modifier
 // file path: ./internal/modifiers/builder.go
 package modifiers
 
@@ -10,8 +10,8 @@ type ModifierBuilder interface {
 	SetKind(kind ModifierKind) ModifierBuilder
 	SetValue(value float64) ModifierBuilder
 	SetSource(source ModifierSourceType) ModifierBuilder
-	Build() Modifier
 	Reset() ModifierBuilder
+	Build() Modifier
 }
 
 type ModifierBuilderImpl struct {
@@ -55,6 +55,7 @@ func (mb *ModifierBuilderImpl) Build() Modifier {
 	return &result
 }
 
-func NewModifierBuilder() ModifierBuilder {
+func NewModifier() ModifierBuilder {
 	return &ModifierBuilderImpl{modifier: &ModifierImpl{}}
 }
+

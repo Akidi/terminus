@@ -2,6 +2,8 @@
 // file path: ./internal/stats/definitions.go
 package stats
 
+import "terminus/internal/modifiers"
+
 type AttrCategory int
 
 const (
@@ -45,7 +47,16 @@ func (ad *AttributeDefinitionImpl) Category() AttrCategory {
 	return ad.category
 }
 
-var AttributeDefs = map[string]*AttributeDefinitionImpl{
+func NewAttributeFromDef(def *AttributeDefinitionImpl, value float64) Attribute {
+	return &AttributeImpl{
+		definition: def,
+		current:    value,
+		modified:   value,
+		modifiers:  modifiers.NewModifiers(),
+	}
+}
+
+var AttributeDefs = map[AttributeName]*AttributeDefinitionImpl{
 	"Strength":     {id: "Strength", name: "Strength", shortName: "STR", description: "Physical power and carry capacity", category: Primary},
 	"Dexterity":    {id: "Dexterity", name: "Dexterity", shortName: "DEX", description: "Speed, accuracy, evasion", category: Primary},
 	"Vitality":     {id: "Vitality", name: "Vitality", shortName: "VIT", description: "Health, defense, endurance", category: Primary},

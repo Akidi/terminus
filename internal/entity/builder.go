@@ -13,8 +13,8 @@ type EntityBuilder interface {
 	SetLevel(level int) EntityBuilder
 	SetArchType(archtype ArchType) EntityBuilder
 	SetAttributes(ac stats.Attributes) EntityBuilder
-	Build() Entity
 	Reset() EntityBuilder
+	Build() Entity
 }
 
 type EntityBuilderImpl struct {

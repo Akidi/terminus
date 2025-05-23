@@ -3,8 +3,11 @@
 package stats
 
 import (
+	"fmt"
 	"terminus/internal/common"
 	"terminus/internal/modifiers"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 type AttributeName string
@@ -31,7 +34,9 @@ type Attribute interface {
 	Current()			float64
 	SetCurrent(current float64)
 	Modified()		float64
+	Modifiers()		modifiers.ModifiersImpl
 	SetModified(modified float64)
+	String()	string
 	AsJSON() AttributeJson
 }
 
@@ -39,7 +44,7 @@ type AttributeImpl struct {
 	definition	AttributeDefinition
 	current			float64
 	modified		float64
-	modifiers		[]modifiers.Modifier
+	modifiers		modifiers.ModifiersImpl
 }
 
 func (a *AttributeImpl) Current() float64 {
@@ -58,53 +63,41 @@ func (a *AttributeImpl) SetModified(modified float64) {
 	a.modified = modified
 }
 
-func (a *AttributeImpl) Modifiers() []modifiers.Modifier {
+func (a *AttributeImpl) Modifiers() modifiers.ModifiersImpl {
 	return a.modifiers
+}
+
+var (
+	attrStyle     = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("69"))
+	baseStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
+	modifiedStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("205"))
+)
+
+func (a *AttributeImpl) String() string {
+	label := attrStyle.Render(fmt.Sprintf("%-12s", a.definition.Name()))
+	base := baseStyle.Render(fmt.Sprintf("Base: %-4.0f", a.Current()))
+	mod := modifiedStyle.Render(fmt.Sprintf("Modified: %-4.0f", a.Modified()))
+	return fmt.Sprintf("%s  %s  %s", label, base, mod)
 }
 
 type AttributeJson struct {
 	Name 			string	`json:"name"`
 	Current		float64	`json:"current"`
+	Modified	float64	`json:"modified"`
 	Modifiers []modifiers.ModifierJson	`json:"modifiers"`
 }
 
 func (a *AttributeImpl) AsJSON() AttributeJson {
-	mods := make([]modifiers.ModifierJson, 0, len(a.Modifiers()))
-	for _, mod := range a.modifiers {
-		mods = append(mods, mod.AsJSON())
-	}
 	return AttributeJson{
 		Name: a.definition.Name(),
 		Current: a.Current(),
-		Modifiers: mods,
+		Modified: a.Modified(),
+		Modifiers: a.modifiers.AsJSON(),
 	}
 }
 
 func (a *AttributeImpl) ToJSON() ([]byte, error) {
 	return common.ToJSON(a)
-}
-
-func NewAttribute(name string, shortName string, description string, category AttrCategory, initialValue float64) Attribute {
-	return &AttributeImpl{
-		definition: &AttributeDefinitionImpl{
-			name: name,
-			shortName: shortName,
-			description: description,
-			category: category,
-		},
-		current: initialValue,
-		modified: initialValue,
-		modifiers: []modifiers.Modifier{},
-	}
-}
-
-func NewAttributeFromDef(def *AttributeDefinitionImpl, value float64) Attribute {
-	return &AttributeImpl{
-		definition: def,
-		current:    value,
-		modified:   value,
-		modifiers:  []modifiers.Modifier{},
-	}
 }
 
 type Attributes interface {
@@ -116,6 +109,8 @@ type Attributes interface {
 	Get(name AttributeName)	Attribute
 	All()							[]Attribute
 	AsJSON()					[]AttributeJson
+	String()					string
+	ApplyAll()
 }
 
 type AttributesImpl struct {
@@ -159,6 +154,24 @@ func (a AttributesImpl) All() []Attribute {
 	return out
 }
 
+var (
+	titleStyle     = lipgloss.NewStyle().Bold(true).Underline(true).Foreground(lipgloss.Color("63"))
+	sectionStyle   = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("219"))
+	modListStyle   = lipgloss.NewStyle().MarginLeft(2)
+	modEmptyStyle  = lipgloss.NewStyle().Faint(true).Italic(true).MarginLeft(2)
+)
+
+func (a AttributesImpl) String() string {
+	var s string
+	s += titleStyle.Render("Attributes:") + "\n\n"
+	for _, attrName := range AttributeNames {
+		attr := a.Get(attrName)
+		s += attr.String() + "\n"
+		s += attr.Modifiers().String() + "\n"
+	}
+	return s
+}
+
 type AttributesJson struct {
 	Attributes []AttributeJson `json:"attributes"`
 }
@@ -178,6 +191,13 @@ func (a *AttributesImpl) AsJSON() []AttributeJson {
 	return attrs
 }
 
+func (a *AttributesImpl) ApplyAll() {
+	for _, k := range AttributeNames {
+		attr:=a.Get(k)
+		attr.SetModified(attr.Modifiers().ApplyAll(attr.Current()))
+	}
+}
+
 func NewAttributes() Attributes {
 	return &AttributesImpl{
 		attributes: map[AttributeName]Attribute{
@@ -190,4 +210,3 @@ func NewAttributes() Attributes {
 		},
 	}
 }
-
