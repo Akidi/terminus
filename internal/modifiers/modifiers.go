@@ -5,15 +5,15 @@ package modifiers
 type ModifierTarget string
 
 const (
-	TargetStrength		ModifierTarget = "strength"
-	TargetDexterity		ModifierTarget = "dexterity"
-	TargetVitality		ModifierTarget = "vitality"
+	TargetStrength			ModifierTarget = "strength"
+	TargetDexterity			ModifierTarget = "dexterity"
+	TargetVitality			ModifierTarget = "vitality"
 	TargetIntelligence	ModifierTarget = "intelligence"
-	TargetWisdom			ModifierTarget = "wisdom"
-	TargetLuck				ModifierTarget = "luck"
+	TargetWisdom				ModifierTarget = "wisdom"
+	TargetLuck					ModifierTarget = "luck"
 
-	TargetMaxHP				ModifierTarget = "max_hp"
-	TargetMaxMP				ModifierTarget = "max_mp"
+	TargetMaxHP					ModifierTarget = "max_hp"
+	TargetMaxMP					ModifierTarget = "max_mp"
 )
 
 type ModifierSourceType int
@@ -34,14 +34,14 @@ const (
 )
 
 type Modifier interface {
-	ID() string
-	Name() string
-	Target() ModifierTarget
-	Kind() ModifierKind
-	Value() float64
-	Source() ModifierSourceType
+	ID() 			string
+	Name()		string
+	Target()	ModifierTarget
+	Kind()		ModifierKind
+	Value()		float64
+	Source()	ModifierSourceType
 	Apply(base float64) float64
-	AsJSON() ModifierJson
+	AsJSON()	ModifierJson
 }
 
 type ModifierImpl struct {
@@ -81,8 +81,8 @@ func (m *ModifierImpl) Apply(base float64) float64 {
 	return base
 }
 
-func (m *ModifierImpl) AsJSON() *ModifierJson {
-	return &ModifierJson{
+func (m *ModifierImpl) AsJSON() ModifierJson {
+	return ModifierJson{
 		ID: m.id,
 		Name: m.name,
 		Target: m.target,

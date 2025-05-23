@@ -47,7 +47,7 @@ func (eb *EntityBuilderImpl) Reset() EntityBuilder {
 }
 
 func (eb *EntityBuilderImpl) Build() Entity {
-	result := eb.entity
+	result := *eb.entity
 	result.id = xid.New().String()
 	if result.name == "" {
 		result.name = "Unnamed"
@@ -62,7 +62,7 @@ func (eb *EntityBuilderImpl) Build() Entity {
 		result.attributes = stats.NewAttributes()
 	}
 	eb.Reset()
-	return result
+	return &result
 }
 
 func NewEntityBuilder() EntityBuilder {

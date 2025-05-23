@@ -63,20 +63,20 @@ func (a *AttributeImpl) Modifiers() []modifiers.Modifier {
 }
 
 type AttributeJson struct {
-	Name string	`json:"name"`
-	Current	float64	`json:"current"`
+	Name 			string	`json:"name"`
+	Current		float64	`json:"current"`
 	Modifiers []modifiers.ModifierJson	`json:"modifiers"`
 }
 
 func (a *AttributeImpl) AsJSON() AttributeJson {
-	modifiers := make([]modifiers.ModifierJson, 0, len(a.Modifiers()))
+	mods := make([]modifiers.ModifierJson, 0, len(a.Modifiers()))
 	for _, mod := range a.modifiers {
-		modifiers = append(modifiers, mod.AsJSON())
+		mods = append(mods, mod.AsJSON())
 	}
 	return AttributeJson{
 		Name: a.definition.Name(),
 		Current: a.Current(),
-		Modifiers: modifiers,
+		Modifiers: mods,
 	}
 }
 
